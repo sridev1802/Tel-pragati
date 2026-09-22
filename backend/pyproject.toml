@@ -65,3 +65,7 @@ target-version = "py311"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+
+[tool.uv.extra-build-dependencies]
+baghewala-digital-twin = ["setuptools.backends"]
