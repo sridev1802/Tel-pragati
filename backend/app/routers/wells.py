@@ -5,6 +5,7 @@ The /state endpoint is the most important endpoint in the whole system:
 it fuses physics engine + ML inference into a single WellState response
 matching the frontend's TypeScript WellState interface exactly (camelCase).
 """
+from pydantic import BaseModel, Field
 from __future__ import annotations
 
 import math
