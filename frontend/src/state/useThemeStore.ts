@@ -22,8 +22,8 @@ function applyTheme(mode: ThemeMode) {
 
 const savedTheme =
   typeof window !== "undefined"
-    ? (localStorage.getItem("tel-pragati-theme") as ThemeMode) || "dark"
-    : "dark";
+    ? (localStorage.getItem("tel-pragati-theme") as ThemeMode) || "light"
+    : "light";
 
 export const useThemeStore = create<ThemeState>((set) => {
   // Apply on init

@@ -42,6 +42,18 @@ const variantStyles = {
   brand:      { valueColor: "text-brand",             sparkColor: "var(--brand)",              border: "border-line hover:border-brand/40",             iconBg: "bg-brand/15 text-brand" },
 };
 
+/* Solid fills: the whole box takes the severity colour (fixed shades chosen for white text). */
+const filledGradient: Record<string, string> = {
+  critical:   "linear-gradient(135deg, #DC3B2F 0%, #A82218 100%)",
+  warn:       "linear-gradient(135deg, #D9800B 0%, #A85E05 100%)",
+  safe:       "linear-gradient(135deg, #22A05A 0%, #15703E 100%)",
+  mechanical: "linear-gradient(135deg, #12A08E 0%, #0A6E62 100%)",
+  thermal:    "linear-gradient(135deg, #DE5A3A 0%, #A63A1E 100%)",
+  amber:      "linear-gradient(135deg, #E8A020 0%, #B5730A 100%)",
+  brand:      "linear-gradient(135deg, #7C6BE8 0%, #5343B8 100%)",
+  neutral:    "linear-gradient(135deg, #5B6675 0%, #3B4453 100%)",
+};
+
 export function StatCard({
   label,
   value,
@@ -105,22 +117,21 @@ export function StatCard({
 
   const trendClass =
     trendPct !== undefined
-      ? trendPct > 0 ? "text-status-safe"
-      : trendPct < 0 ? "text-status-warn"
-      : "text-text-muted"
+      ? "text-white/90"
       : "";
 
   return (
     <div
-      className={`bg-surface-1 border rounded-xl p-4 shadow-card transition-all duration-300 flex flex-col justify-between ${v.border} ${statusPanel[resolvedStatus]} ${pulseClass} ${className}`}
+      style={{ background: filledGradient[variant] }}
+      className={`border border-white/10 rounded-xl p-4 shadow-card text-white transition-all duration-300 flex flex-col justify-between hover:brightness-110 ${pulseClass} ${className}`}
     >
       {/* Label row */}
       <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-xs font-sans font-medium text-text-secondary uppercase tracking-wide">
+        <span className="text-xs font-sans font-semibold text-white/85 uppercase tracking-wide">
           {label}
         </span>
         {icon ? (
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${v.iconBg}`}>
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-white/20 text-white`}>
             {icon}
           </div>
         ) : trendPct !== undefined ? (
@@ -134,18 +145,18 @@ export function StatCard({
       {/* Value row */}
       <div className="flex items-baseline justify-between gap-2">
         <div className="flex items-baseline gap-1.5 min-w-0">
-          <span className={`text-2xl sm:text-3xl font-mono font-bold tracking-tight tabular-nums ${v.valueColor}`}>
+          <span className="text-2xl sm:text-3xl font-mono font-bold tracking-tight tabular-nums text-white">
             {value}
           </span>
           {unit && (
-            <span className="text-xs font-mono text-text-muted font-normal flex-shrink-0">
+            <span className="text-xs font-mono text-white/75 font-normal flex-shrink-0">
               {unit}
             </span>
           )}
         </div>
         {sparklineData && sparklineData.length > 0 && (
           <div className="w-20 h-7 flex-shrink-0">
-            <Sparkline data={sparklineData} color={v.sparkColor} height={28} />
+            <Sparkline data={sparklineData} color="#FFFFFF" height={28} />
           </div>
         )}
       </div>
@@ -155,14 +166,14 @@ export function StatCard({
         <div className={`flex items-center gap-1 text-[11px] font-mono font-semibold mt-1.5 ${trendClass}`}>
           {trendPct > 0 ? <TrendingUp className="w-3 h-3" /> : trendPct < 0 ? <TrendingDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
           <span>{trendPct > 0 ? `+${trendPct}%` : `${trendPct}%`}</span>
-          <span className="text-text-muted font-sans font-normal normal-case">vs last period</span>
+          <span className="text-white/75 font-sans font-normal normal-case">vs last period</span>
         </div>
       )}
 
       {/* Subtext */}
       {subtext && (
-        <div className="pt-2 mt-2 border-t border-line">
-          <span className="text-[11px] text-text-muted font-sans line-clamp-1">{subtext}</span>
+        <div className="pt-2 mt-2 border-t border-white/25">
+          <span className="text-[11px] text-white/85 font-sans line-clamp-1">{subtext}</span>
         </div>
       )}
     </div>

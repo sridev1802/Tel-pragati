@@ -13,6 +13,7 @@ import { StatCard } from "../../components/cards/StatCard";
 import { WellSummaryCard } from "../../components/cards/WellSummaryCard";
 import { TreemapChart } from "../../components/charts/TreemapChart";
 import { DonutChart } from "../../components/charts/DonutChart";
+import { FieldSatellitePreview } from "../../components/map/FieldSatellitePreview";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { SectionCard } from "../../components/ui/SectionCard";
 
@@ -178,38 +179,13 @@ export default function FleetOverviewPage() {
             </Link>
           }
         >
-          <div
-            onClick={() => router.push("/field/map")}
-            className="relative h-56 bg-surface-0 border border-line cursor-pointer overflow-hidden group hover:border-accent-mechanical/50 transition-colors"
-          >
-            <div className="absolute inset-0 opacity-20 depth-rail-bg" />
-            <div className="relative w-full h-full p-3">
-              {wells.map((w) => {
-                const left = ((w.lon - 72.41) / 0.03) * 80 + 10;
-                const top  = ((w.lat - 27.805) / 0.02) * 75 + 10;
-                const color =
-                  w.status === "producing"  ? "bg-status-safe"     :
-                  w.status === "css_active" ? "bg-accent-thermal"  :
-                  w.status === "alarm"      ? "bg-status-critical" : "bg-text-muted";
-                return (
-                  <div
-                    key={w.wellId}
-                    style={{ left: `${Math.max(5, Math.min(90, left))}%`, top: `${Math.max(5, Math.min(85, top))}%` }}
-                    className="absolute flex items-center gap-1 transform -translate-x-1/2 -translate-y-1/2"
-                  >
-                    <span className={`w-2.5 h-2.5 rounded-full ${color} ring-2 ring-surface-0 animate-pulse-subtle`} />
-                    <span className="text-[10px] font-mono text-text-primary bg-surface-1/90 px-1 rounded border border-line hidden sm:inline">
-                      {w.name}
-                    </span>
-                  </div>
-                );
-              })}
-              <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-surface-1 border border-accent-thermal shadow-popup flex items-center gap-1">
-                <Flame className="w-3.5 h-3.5 text-accent-thermal" />
-                <span className="text-[9px] font-mono font-bold text-accent-thermal">Central Gathering</span>
-              </div>
-            </div>
-            <div className="absolute bottom-2 right-2 px-2 py-1 bg-surface-1/90 text-[10px] font-mono text-text-muted border border-line">
+          <div className="relative h-56 border border-line overflow-hidden group hover:border-accent-mechanical/50 transition-colors rounded-lg">
+            <FieldSatellitePreview
+              wells={wells}
+              onOpen={() => router.push("/field/map")}
+              className="absolute inset-0"
+            />
+            <div className="pointer-events-none absolute bottom-2 right-2 z-[600] px-2 py-1 rounded bg-black/65 text-[10px] font-mono text-white">
               Click → Interactive GIS / SCADA
             </div>
           </div>

@@ -2,8 +2,10 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { CameraBookmark, Overlay3DMode, WellState } from "../../data/types";
 import { useSceneStore } from "../../state/useSceneStore";
+import { useThemeStore } from "../../state/useThemeStore";
 import { Wellbore2DFallback } from "./Wellbore2DFallback";
 import { Layers, Camera, Scissors, RotateCw, AlertTriangle } from "lucide-react";
 
@@ -25,6 +27,7 @@ export function WellboreScene({
   const containerRef = useRef<HTMLDivElement>(null);
   const { overlayMode, cameraBookmark, isCrossSection, setOverlayMode, setCameraBookmark, toggleCrossSection } =
     useSceneStore();
+  const themeMode = useThemeStore((st) => st.mode);
 
   const [webGlSupported, setWebGlSupported] = useState<boolean | null>(null);
   const [showFallback, setShowFallback] = useState(false);
@@ -69,8 +72,10 @@ export function WellboreScene({
     }
 
     // Scene, Camera, Renderer
+    const isLight = themeMode === "light";
+    let disposed = false;
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color("#0C0F12");
+    scene.background = new THREE.Color(isLight ? "#E6EEF7" : "#0C0F12");
 
     const camera = new THREE.PerspectiveCamera(45, width / Math.max(1, heightPx), 0.1, 1000);
     renderer.setSize(width, heightPx);
@@ -91,6 +96,8 @@ export function WellboreScene({
     const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5);
     dirLight1.position.set(15, 25, 20);
     scene.add(dirLight1);
+
+    scene.add(new THREE.HemisphereLight(0xffffff, isLight ? 0x8fa3b8 : 0x27303a, 0.9));
 
     const dirLight2 = new THREE.DirectionalLight(0x00b4a0, 0.8);
     dirLight2.position.set(-15, -10, -10);
@@ -119,7 +126,7 @@ export function WellboreScene({
 
     // 1. Surface Pad & Ground Plane
     const groundGeo = new THREE.CylinderGeometry(8, 8, 0.4, 32);
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a2028, roughness: 0.8 });
+    const groundMat = new THREE.MeshStandardMaterial({ color: isLight ? 0xc9b48a : 0x1a2028, roughness: 0.8 });
     const groundMesh = new THREE.Mesh(groundGeo, groundMat);
     groundMesh.position.y = 0;
     groundMesh.name = "surface_pad";
@@ -153,6 +160,67 @@ export function WellboreScene({
     unitGroup.add(horse);
 
     rootGroup.add(unitGroup);
+
+    // 2b. Oil pump model (converted from Oil_Pump_WIP.usdz). Split into moving parts:
+    //     beam+horsehead rock about the saddle bearing, polished rod reciprocates,
+    //     pitman arms follow the beam tail. The procedural unit above is the fallback.
+    const PUMP_SCALE = 3.2;
+    const PIVOT = new THREE.Vector2(0.03, 0.27);      // saddle bearing (model units)
+    const TAIL = new THREE.Vector2(-0.63, -0.03);     // beam tail / pitman top
+    const CRANK = new THREE.Vector2(-0.625, -0.67);   // pitman lower pin
+    const THETA_MAX = 0.12;                           // rod stroke matches rodString (~0.35 units)
+    let pumpParts: { beam: THREE.Object3D; rod: THREE.Object3D; pitman: THREE.Object3D } | null = null;
+
+    new GLTFLoader().load(
+      "/models/oil_pump.glb",
+      (gltf) => {
+        if (disposed) return;
+        const model = gltf.scene;
+        const beamN = model.getObjectByName("pump_beam");
+        const rodN = model.getObjectByName("pump_rod");
+        const pitN = model.getObjectByName("pump_pitman");
+        if (!beamN || !rodN || !pitN) return; // keep fallback
+        model.traverse((o) => {
+          const mesh = o as THREE.Mesh;
+          if (mesh.isMesh) {
+            const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+            mats.forEach((mt) => { (mt as THREE.Material).clippingPlanes = clippingPlanes; });
+          }
+        });
+        const holder = new THREE.Group();
+        holder.name = "pumping_unit";
+        holder.scale.setScalar(PUMP_SCALE);
+        // Polished rod (model x≈0.955, skid bottom y≈-0.86) sits on the wellhead axis on top of the pad
+        holder.position.set(-0.955 * PUMP_SCALE, 0.2 + 0.86 * PUMP_SCALE, 0);
+        holder.add(model);
+        rootGroup.add(holder);
+        rootGroup.remove(unitGroup);
+        pumpParts = { beam: beamN, rod: rodN, pitman: pitN };
+      },
+      undefined,
+      (err) => console.warn("Oil pump model failed to load, using procedural pumping unit", err)
+    );
+
+    const poseOilPump = (k: number) => {
+      if (!pumpParts) return;
+      const th = k * THETA_MAX;
+      const c = Math.cos(th), sn = Math.sin(th);
+      const { beam: b, rod: r, pitman: pm } = pumpParts;
+      b.rotation.z = th;
+      b.position.set(PIVOT.x - (PIVOT.x * c - PIVOT.y * sn), PIVOT.y - (PIVOT.x * sn + PIVOT.y * c), 0);
+      r.position.y = 0.92 * sn;
+      // Pitman: rotate/stretch about the crank pin so its top stays on the moving beam tail
+      const dx = TAIL.x - PIVOT.x, dy = TAIL.y - PIVOT.y;
+      const tx = PIVOT.x + dx * c - dy * sn, ty = PIVOT.y + dx * sn + dy * c;
+      const v0x = TAIL.x - CRANK.x, v0y = TAIL.y - CRANK.y;
+      const v1x = tx - CRANK.x, v1y = ty - CRANK.y;
+      const sy = Math.hypot(v1x, v1y) / Math.hypot(v0x, v0y);
+      const phi = Math.atan2(v1y, v1x) - Math.atan2(v0y, v0x);
+      const pc = Math.cos(phi), ps = Math.sin(phi);
+      pm.rotation.z = phi;
+      pm.scale.set(1, sy, 1);
+      pm.position.set(CRANK.x - (pc * CRANK.x - ps * sy * CRANK.y), CRANK.y - (ps * CRANK.x + pc * sy * CRANK.y), 0);
+    };
 
     // 3. Wellbore Casing (Outer) & Tubing (Inner)
     const totalWellDepth = 14; // Scaled scene units
@@ -254,8 +322,8 @@ export function WellboreScene({
     const applyCameraBookmark = (bookmark: CameraBookmark) => {
       switch (bookmark) {
         case "surface":
-          camera.position.set(0, 5, 8);
-          camera.lookAt(0, 2, 0);
+          camera.position.set(-1.5, 4.8, 15.5);
+          camera.lookAt(-2.6, 2.7, 0);
           break;
         case "downhole":
           camera.position.set(0, -totalWellDepth + 2, 6);
@@ -289,6 +357,7 @@ export function WellboreScene({
       const reciprocation = Math.sin(elapsedTime * cycleFreq);
       beam.rotation.x = reciprocation * 0.15;
       rodString.position.y = -totalWellDepth / 2 + reciprocation * 0.35;
+      poseOilPump(reciprocation);
 
       // Fluid particle ascent
       const posAttr = particleGeo.attributes.position as THREE.BufferAttribute;
@@ -340,7 +409,7 @@ export function WellboreScene({
             node = node.parent as THREE.Mesh;
           }
           if (node && node.name) {
-            onSelectNode(node.name);
+            onSelectNode(node.name.startsWith("pump_") ? "pumping_unit" : node.name);
           }
         }
       }
@@ -375,6 +444,7 @@ export function WellboreScene({
     container.addEventListener("wheel", onWheel, { passive: false });
 
     return () => {
+      disposed = true;
       cancelAnimationFrame(animationFrameId);
       container.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mousemove", onMouseMove);
@@ -385,7 +455,7 @@ export function WellboreScene({
       }
       renderer.dispose();
     };
-  }, [wellState, overlayMode, cameraBookmark, isCrossSection, interactive, autoRotate, webGlSupported, showFallback, onSelectNode]);
+  }, [wellState, overlayMode, cameraBookmark, isCrossSection, interactive, autoRotate, webGlSupported, showFallback, onSelectNode, themeMode]);
 
   if (showFallback || webGlSupported === false) {
     return (

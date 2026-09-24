@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Eye, EyeOff, ChevronRight, Phone, Mail, FileText,
-  Languages, X, Server, ShieldCheck, Cpu,
+  Languages, X, Server, ShieldCheck, Cpu, Lock, User as UserIcon, UserCog,
 } from "lucide-react";
 import { Role } from "../../data/types";
 import { useAuthStore } from "../../state/useAuthStore";
@@ -46,26 +46,40 @@ export default function LoginPage() {
     }, 600);
   };
 
-  return (
-    <div className="min-h-screen bg-surface-0 flex flex-col font-sans antialiased text-text-primary selection:bg-accent-amber/30 selection:text-white">
+  const fieldLabel = "block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1.5";
+  const fieldBase =
+    "w-full rounded-xl border-2 border-slate-200 bg-white/90 text-sm text-slate-900 font-semibold " +
+    "focus:outline-none focus:border-[#F0A030] focus:ring-4 focus:ring-[#F0A030]/20 placeholder:text-slate-400 transition-shadow";
 
-      {/* ── Top Strip ─────────────────────────────────────────── */}
-      <div className="h-10 bg-surface-1 border-b border-line px-6 flex items-center justify-between flex-shrink-0">
-        {/* Left: OIL India / MoPNG badge */}
-        <div className="flex items-center gap-2 text-[10px] font-mono text-text-secondary uppercase tracking-widest">
-          <span className="font-bold text-text-primary">OIL INDIA LIMITED</span>
-          <span className="text-line">·</span>
-          <span>MoPNG</span>
-          <span className="text-line">·</span>
-          <span>Baghewala Asset</span>
+  return (
+    <div className="relative min-h-screen overflow-hidden flex flex-col font-sans antialiased text-slate-900 selection:bg-[#F0A030]/30"
+         style={{ background: "linear-gradient(135deg, #FFF3DC 0%, #EAF3FF 48%, #DDF5EF 100%)" }}>
+
+      {/* ── Colour washes (logo palette: red, amber, teal, navy) ── */}
+      <div aria-hidden className="pointer-events-none absolute -top-32 -left-32 w-[420px] h-[420px] rounded-full blur-3xl opacity-50" style={{ background: "#F7B267" }} />
+      <div aria-hidden className="pointer-events-none absolute top-1/3 -right-40 w-[520px] h-[520px] rounded-full blur-3xl opacity-40" style={{ background: "#3FB8AF" }} />
+      <div aria-hidden className="pointer-events-none absolute -bottom-40 left-1/4 w-[460px] h-[460px] rounded-full blur-3xl opacity-40" style={{ background: "#F28B82" }} />
+
+      {/* ── Top bar: Oil India logo (left) · language (right) ───── */}
+      <header className="relative z-10 px-5 sm:px-8 pt-4 pb-2 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <img
+            src="/oil-india-logo.png"
+            alt="Oil India Limited"
+            className="h-16 sm:h-20 w-auto object-contain drop-shadow-sm"
+          />
+          <div className="hidden sm:block leading-tight border-l-2 border-[#C8202A]/40 pl-3">
+            <div className="text-sm font-extrabold text-slate-800 tracking-wide">OIL INDIA LIMITED</div>
+            <div className="text-[11px] text-slate-500 font-medium">MoPNG · Baghewala Asset</div>
+          </div>
         </div>
-        {/* Right: language selector */}
-        <div className="flex items-center gap-2">
-          <Languages className="w-3 h-3 text-text-muted" />
+
+        <div className="flex items-center gap-2 bg-white/80 border border-slate-200 rounded-full pl-3 pr-2 py-1 shadow-sm">
+          <Languages className="w-3.5 h-3.5 text-slate-500" />
           <select
             value={selectedLanguage}
             onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="border border-line rounded-sm py-0.5 px-1.5 text-[11px] text-text-primary bg-surface-2 focus:outline-none focus:border-accent-amber cursor-pointer font-medium"
+            className="bg-transparent text-xs text-slate-800 focus:outline-none cursor-pointer font-semibold"
           >
             <option value="English">English</option>
             <option value="Hindi">हिन्दी</option>
@@ -73,175 +87,107 @@ export default function LoginPage() {
             <option value="Rajasthani">राजस्थानी</option>
           </select>
         </div>
-      </div>
+      </header>
 
-      {/* ── Main Content ───────────────────────────────────────── */}
-      <div className="flex flex-1">
+      {/* ── Main: form (left) · big TEL PRAGATI brand (right) ───── */}
+      <main className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-[minmax(400px,500px)_1fr] gap-6 lg:gap-10 px-5 sm:px-8 pb-6 items-center">
 
-        {/* ═══ LEFT PANEL — Brand showcase ════════════════════════ */}
-        <div className="hidden md:flex w-[45%] bg-surface-1 border-r border-line p-8 flex-col gap-6 flex-shrink-0">
-
-          {/* Government badge block */}
-          <div className="border border-line bg-surface-2 p-4 flex items-center gap-3.5">
-            {/* Ashoka emblem */}
-            <div className="w-12 h-14 flex-shrink-0 text-text-primary">
-              <svg viewBox="0 0 100 120" className="w-full h-full fill-current" xmlns="http://www.w3.org/2000/svg">
-                <path d="M50 5 C40 5 35 15 35 25 C35 32 40 38 45 40 C38 42 30 48 30 58 C30 70 42 78 50 80 C58 78 70 70 70 58 C70 48 62 42 55 40 C60 38 65 32 65 25 C65 15 60 5 50 5 Z M50 12 C55 12 58 18 58 24 C58 30 54 34 50 34 C46 34 42 30 42 24 C42 18 45 12 50 12 Z M50 82 C38 82 25 88 25 98 L75 98 C75 88 62 82 50 82 Z" />
-                <circle cx="50" cy="108" r="7" fill="none" stroke="currentColor" strokeWidth="2" />
-                <text x="50" y="118" textAnchor="middle" fontSize="7" fontFamily="serif" fontWeight="bold">सत्यमेव जयते</text>
-              </svg>
-            </div>
-            <div className="leading-snug">
-              <div className="text-[11px] font-bold text-text-primary">Government of India · MoPNG</div>
-              <div className="text-[10px] text-text-secondary mt-0.5">Directorate General of Hydrocarbons (DGH)</div>
-              <div className="text-[10px] text-text-muted">Oil India Limited · Baghewala Asset</div>
-            </div>
+        {/* ═══ LEFT — Sign-in card ═══ */}
+        <section className="w-full max-w-md mx-auto lg:mx-0 lg:ml-4">
+          {/* Compact brand for small screens (big version shows on the right at lg+) */}
+          <div className="lg:hidden flex justify-center mb-4">
+            <img src="/tel-pragati-logo.png" alt="TEL PRAGATI — Progress in Oil Production" className="h-40 w-auto object-contain drop-shadow-md" />
           </div>
 
-          {/* Logo block */}
-          <div className="border border-line bg-surface-2 p-5 flex items-center justify-center min-h-[110px]">
-            <img
-              src="/logo_transparent_name.png"
-              alt="TEL PRAGATI"
-              className="max-h-20 w-auto object-contain"
-            />
-          </div>
+          <div className="rounded-3xl bg-white/90 backdrop-blur shadow-[0_24px_60px_-20px_rgba(11,58,110,0.35)] border border-white overflow-hidden">
+            <div className="h-2" style={{ background: "linear-gradient(90deg,#C8202A,#F0A030,#16808A,#0B3A6E)" }} />
+            <div className="p-6 sm:p-8">
+              <div className="mb-6">
+                <h2 className="text-2xl font-black text-[#0B3A6E] tracking-tight">Secure Access Portal</h2>
+                <p className="text-xs text-slate-500 font-medium mt-1">Sign in to the TEL PRAGATI Digital Twin</p>
+              </div>
 
-          {/* Platform title block */}
-          <div className="border border-line bg-surface-2 p-4 text-center rounded-lg">
-            <h3 className="text-text-primary font-bold text-sm tracking-wide uppercase font-sans">
-              TEL PRAGATI DIGITAL TWIN
-            </h3>
-            <p className="text-accent-amber font-bold text-[10px] tracking-wider uppercase font-mono mt-1">
-              Well-to-Surface Heavy Oil O&M Platform
-            </p>
-          </div>
+              <form onSubmit={handleLoginSubmit} className="space-y-4">
+                <div>
+                  <label className={fieldLabel}>Select role</label>
+                  <div className="relative">
+                    <UserCog className="w-4 h-4 text-[#16808A] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <select
+                      value={selectedRole}
+                      onChange={(e) => handleRoleChange(e.target.value as Role)}
+                      className={`${fieldBase} py-3 pl-10 pr-3 cursor-pointer`}
+                    >
+                      <option value="operator">Technician / Control Room Operator</option>
+                      <option value="engineer">Senior Production Engineer</option>
+                      <option value="admin">Chief General Manager / Asset Administrator</option>
+                      <option value="viewer">Statutory Auditor (MoPNG Inspection)</option>
+                    </select>
+                  </div>
+                </div>
 
-          {/* Bottom: tech stack indicators */}
-          <div className="mt-auto flex items-center gap-4 text-[10px] font-mono text-text-muted border-t border-line pt-4">
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-status-safe animate-pulse-subtle" />
-              MQTT Live
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-mechanical animate-pulse-subtle" />
-              TimescaleDB
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-telemetry animate-pulse-subtle" />
-              MLflow
-            </span>
-          </div>
-        </div>
+                <div>
+                  <label className={fieldLabel}>User ID</label>
+                  <div className="relative">
+                    <UserIcon className="w-4 h-4 text-[#C8202A] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type="text"
+                      required
+                      value={userId}
+                      onChange={(e) => setUserId(e.target.value)}
+                      placeholder="Enter User ID"
+                      className={`${fieldBase} py-3 pl-10 pr-3`}
+                    />
+                  </div>
+                </div>
 
-        {/* ═══ RIGHT PANEL — Auth form ════════════════════════════ */}
-        <div className="flex-1 bg-surface-1 p-8 sm:p-10 flex flex-col justify-center">
-          <div className="w-full max-w-md mx-auto">
+                <div>
+                  <label className={fieldLabel}>Password</label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-[#F0A030] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter Password"
+                      className={`${fieldBase} py-3 pl-10 pr-11`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
 
-            {/* Header */}
-            <div className="mb-6 pb-3 border-b border-line-strong">
-              <h2 className="text-text-primary text-lg font-black tracking-widest uppercase font-mono">
-                SECURE ACCESS PORTAL
-              </h2>
-              <p className="text-[10px] font-mono text-text-muted uppercase tracking-wider mt-1">
-                TEL PRAGATI · OIL INDIA LIMITED
-              </p>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleLoginSubmit} className="space-y-4">
-
-              {/* Role select */}
-              <div>
-                <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-widest mb-1.5">
-                  SELECT ROLE
-                </label>
-                <select
-                  value={selectedRole}
-                  onChange={(e) => handleRoleChange(e.target.value as Role)}
-                  className="w-full border border-line rounded-sm py-2.5 px-3 text-sm text-text-primary bg-surface-2 focus:outline-none focus:border-accent-amber cursor-pointer font-medium"
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full text-white font-extrabold text-sm tracking-wide py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#C8202A]/25 hover:brightness-105 active:scale-[0.99] transition disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+                  style={{ background: "linear-gradient(90deg,#C8202A 0%,#E8590C 55%,#F0A030 100%)" }}
                 >
-                  <option value="operator">Technician / Control Room Operator</option>
-                  <option value="engineer">Senior Production Engineer</option>
-                  <option value="admin">Chief General Manager / Asset Administrator</option>
-                  <option value="viewer">Statutory Auditor (MoPNG Inspection)</option>
-                </select>
-              </div>
+                  {isLoading ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      <span>Authenticating…</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Access dashboard</span>
+                      <ChevronRight className="w-4 h-4 stroke-[3]" />
+                    </>
+                  )}
+                </button>
+              </form>
 
-              {/* User ID */}
-              <div>
-                <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-widest mb-1.5">
-                  USER ID
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                  placeholder="Enter User ID"
-                  className="w-full border border-line rounded-sm py-2.5 px-3 text-sm text-text-primary font-semibold focus:outline-none focus:border-accent-amber bg-surface-2 placeholder:text-text-disabled"
-                />
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-widest mb-1.5">
-                  PASSWORD
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter Password"
-                    className="w-full border border-line rounded-sm py-2.5 pl-3 pr-10 text-sm text-text-primary font-medium focus:outline-none focus:border-accent-amber bg-surface-2 placeholder:text-text-disabled"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-text-muted hover:text-text-primary transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-accent-amber hover:opacity-90 text-surface-0 font-black text-sm tracking-widest uppercase py-3 px-6 rounded-sm flex items-center justify-center gap-2 transition-opacity cursor-pointer active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed mt-2"
-              >
-                {isLoading ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-surface-0/40 border-t-surface-0 rounded-full animate-spin" />
-                    <span>AUTHENTICATING...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>ACCESS DASHBOARD</span>
-                    <ChevronRight className="w-4 h-4 stroke-[3]" />
-                  </>
-                )}
-              </button>
-
-              {/* Loading progress bar */}
-              {isLoading && (
-                <div className="h-0.5 bg-surface-2 overflow-hidden">
-                  <div className="h-full bg-accent-amber animate-[shimmer_1s_ease_infinite] w-full" />
-                </div>
-              )}
-            </form>
-
-            {/* Footer */}
-            <div className="pt-5 mt-6 border-t border-line">
-              <div className="flex items-center justify-between text-[10px] font-mono text-text-muted">
-                <div className="flex items-center gap-3">
-                  <a href="tel:18003453477" className="flex items-center gap-1 hover:text-text-primary transition-colors">
+              <div className="pt-5 mt-6 border-t border-slate-200 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[11px] text-slate-500">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <a href="tel:18003453477" className="flex items-center gap-1 hover:text-[#0B3A6E] transition-colors">
                     <Phone className="w-3 h-3" />1800-345-3477
                   </a>
-                  <span className="text-line">|</span>
                   <span className="flex items-center gap-1">
                     <Mail className="w-3 h-3" />help@telpragati.oilindia.in
                   </span>
@@ -249,59 +195,90 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowIntegrationsModal(true)}
-                  className="flex items-center gap-1 hover:text-text-primary transition-colors"
+                  className="flex items-center gap-1 font-semibold text-[#16808A] hover:text-[#0B3A6E] transition-colors"
                 >
                   <FileText className="w-3 h-3" />Integrations
                 </button>
               </div>
             </div>
-
           </div>
-        </div>
-      </div>
+        </section>
+
+        {/* ═══ RIGHT — Big TEL PRAGATI brand panel (lg+) ═══ */}
+        <section className="hidden lg:flex flex-col items-center justify-center h-full min-h-[560px] rounded-[2rem] relative overflow-hidden border border-white/70 shadow-[0_30px_80px_-30px_rgba(11,58,110,0.45)]"
+                 style={{ background: "linear-gradient(160deg, rgba(255,255,255,0.92) 0%, rgba(255,247,232,0.85) 45%, rgba(224,246,242,0.9) 100%)" }}>
+          <div aria-hidden className="absolute -top-24 -right-24 w-80 h-80 rounded-full opacity-40 blur-2xl" style={{ background: "#F0A030" }} />
+          <div aria-hidden className="absolute -bottom-28 -left-20 w-96 h-96 rounded-full opacity-30 blur-2xl" style={{ background: "#16808A" }} />
+
+          <img
+            src="/tel-pragati-logo.png"
+            alt="TEL PRAGATI — Progress in Oil Production"
+            className="relative w-[min(88%,620px)] h-auto object-contain drop-shadow-[0_18px_30px_rgba(11,58,110,0.25)]"
+          />
+
+          <div className="relative mt-4 text-center px-8">
+            <h1 className="text-3xl xl:text-4xl font-black tracking-tight text-[#0B3A6E]">TEL PRAGATI Digital Twin</h1>
+            <p className="mt-2 text-sm xl:text-base font-semibold text-[#C8202A]">Well-to-Surface Heavy Oil O&amp;M Platform</p>
+            <p className="mt-1 text-xs text-slate-500 font-medium">Baghewala Field · Oil India Limited</p>
+          </div>
+
+          <div className="relative mt-6 flex flex-wrap items-center justify-center gap-2.5">
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse-subtle" />MQTT Live
+            </span>
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-200 text-teal-700 text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse-subtle" />TimescaleDB
+            </span>
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse-subtle" />MLflow
+            </span>
+          </div>
+        </section>
+      </main>
 
       {/* ── Integrations Modal ─────────────────────────────────── */}
       {showIntegrationsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-          <div className="w-full max-w-lg bg-surface-1 rounded-sm shadow-popup border border-line p-6 space-y-4 text-text-primary">
-            <div className="flex items-center justify-between border-b border-line pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 space-y-4 text-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-sm bg-mechanical-soft text-accent-mechanical flex items-center justify-center">
+                <div className="w-9 h-9 rounded-lg bg-teal-50 text-[#16808A] flex items-center justify-center">
                   <Server className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-text-primary">TEL PRAGATI — Active Integrations</h3>
-                  <p className="text-[10px] text-text-muted font-mono">Baghewala Asset Real-Time Topology</p>
+                  <h3 className="text-sm font-bold text-slate-900">TEL PRAGATI — Active Integrations</h3>
+                  <p className="text-[11px] text-slate-500 font-mono">Baghewala Asset Real-Time Topology</p>
                 </div>
               </div>
-              <button onClick={() => setShowIntegrationsModal(false)} className="p-1.5 rounded-sm text-text-muted hover:text-text-primary hover:bg-surface-2">
+              <button onClick={() => setShowIntegrationsModal(false)} aria-label="Close" className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-2">
               {[
-                { icon: <Cpu className="w-4 h-4 text-accent-mechanical" />, name: "Baghewala Wellhead IoT Broker", detail: "MQTT TCP:1883 / WS:9001 (Active)" },
-                { icon: <Server className="w-4 h-4 text-accent-telemetry" />, name: "TimescaleDB Telemetry Historian", detail: "PostgreSQL 16 :5432 (Hypertable Synced)" },
-                { icon: <ShieldCheck className="w-4 h-4 text-accent-thermal" />, name: "MLflow Model Registry", detail: "Port :5000 (Physics + ML Fusion Engine)" },
+                { icon: <Cpu className="w-4 h-4 text-[#16808A]" />, name: "Baghewala Wellhead IoT Broker", detail: "MQTT TCP:1883 / WS:9001 (Active)" },
+                { icon: <Server className="w-4 h-4 text-blue-600" />, name: "TimescaleDB Telemetry Historian", detail: "PostgreSQL 16 :5432 (Hypertable Synced)" },
+                { icon: <ShieldCheck className="w-4 h-4 text-[#C8202A]" />, name: "MLflow Model Registry", detail: "Port :5000 (Physics + ML Fusion Engine)" },
               ].map((item) => (
-                <div key={item.name} className="p-3 rounded-sm bg-surface-2 border border-line flex items-center justify-between">
+                <div key={item.name} className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {item.icon}
                     <div>
-                      <div className="text-xs font-semibold text-text-primary">{item.name}</div>
-                      <div className="text-[10px] text-text-muted font-mono">{item.detail}</div>
+                      <div className="text-xs font-semibold text-slate-900">{item.name}</div>
+                      <div className="text-[11px] text-slate-500 font-mono">{item.detail}</div>
                     </div>
                   </div>
-                  <span className="px-2 py-0.5 rounded-sm bg-status-safe/10 text-status-safe text-[10px] font-bold border border-status-safe/20">ONLINE</span>
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">ONLINE</span>
                 </div>
               ))}
             </div>
 
-            <div className="flex justify-end pt-1 border-t border-line">
+            <div className="flex justify-end pt-1">
               <button
                 onClick={() => setShowIntegrationsModal(false)}
-                className="px-4 py-2 rounded-sm bg-accent-amber hover:opacity-90 text-surface-0 text-xs font-bold transition-opacity"
+                className="px-5 py-2 rounded-lg text-white text-xs font-bold hover:brightness-105"
+                style={{ background: "linear-gradient(90deg,#C8202A,#F0A030)" }}
               >
                 Close
               </button>
